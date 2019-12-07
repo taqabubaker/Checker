@@ -1,0 +1,91 @@
+﻿@model TodoViewModel
+@using Humanizer
+@{
+    ViewData["Title"] = "Manage your todo list";
+}
+<div class="panel panel-default todo-panel">
+    <div class="panel-heading">@ViewData["Title"]</div>
+    <h2>To Do</h2>
+    <div class="panel-footer add-item-form">
+        @await Html.PartialAsync("AddItemPartial", new TodoItem())
+    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <td>&#x2714;</td>
+                <td>Item</td>
+                <td>Due</td>
+            </tr>
+        </thead>
+        @foreach (var item in Model.Items)
+        {
+    <tr>
+        <td>
+            <form asp-action="MarkDone" method="POST">
+                <input type="checkbox" class="done-checkbox">
+                <input type="hidden" name="id" value="@item.Id">
+            </form>
+        </td>
+        <td>@item.Title</td>
+        <td>@item.DueAt.Humanize()</td>
+        <td>
+            <form asp-action="DeleteSingle" asp-route-id="@item.Id" method="POST">
+                <button type="submit">Delete</button>
+                <input type="hidden" name="id" value="@item.Id">
+            </form>
+        </td>
+    </tr>
+        }
+    </table>
+    <br />
+    <h2>Done</h2>
+    <div class="float-right">
+        <form asp-action="DeleteAll" method="POST">
+            <button type="submit">Delete All</button>
+        </form>
+    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <td>&#x2714;</td>
+                <td>Item</td>
+                <td>Due</td>
+            </tr>
+        </thead>
+        @foreach (var item in Model.DoneItems)
+        {
+            <tr class="done">
+                <td>
+                    <input type="checkbox" class="done-checkbox" disabled="disabled">
+                    
+                </td>
+                <td>@item.Title</td>
+                <td>@item.DueAt.Humanize()</td>
+                <td>
+                    <form asp-action="DeleteSingle" asp-route-id="@item.Id" method="POST">
+                        <button type="submit">Delete</button>
+                        <input type="hidden" name="id" value="@item.Id">
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Wire up all of the checkboxes to run markCompleted()
+            $('.done-checkbox').on('click', function (e) {
+                markCompleted(e.target);
+            });
+        });
+        function markCompleted(checkbox) {
+            checkbox.disabled = true;
+            var row = checkbox.closest('tr');
+            $(row).addClass('done');
+            var form = checkbox.closest('form');
+            form.submit();
+        }
+    </script>
+}
